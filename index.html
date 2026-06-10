@@ -1,1 +1,1731 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --gold:       #A8881F;
+      --gold-dim:   rgba(168,136,31,0.18);
+      --gold-line:  rgba(168,136,31,0.4);
+      --black:      #0A0A0A;
+      --maroon:     #1a0505;
+      --panel:      #FFFFFF;
+      --panel2:     #F8F6F1;
+      --white:      #1a1a1a;
+      --muted:      #888888;
+      --green:      #1a9e4f;
+      --amber:      #d4880a;
+      --red:        #cc2a2a;
+      --border:     rgba(168,136,31,0.35);
+    }
 
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    #bss-page {
+      height: 100%;
+      background: #F0EBE0;
+      color: #1a1a1a;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── AMBIENT BACKGROUND ─────────────────────────── */
+    #bss-page::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 100% 0%, rgba(201,162,39,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 0% 100%, rgba(201,162,39,0.07) 0%, transparent 60%),
+        linear-gradient(160deg, #F5F0E8 0%, #EDE5D5 40%, #E8DEC8 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Subtle gold grid */
+    #bss-page::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,162,39,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,162,39,0.06) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(240,235,224,0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-logo {
+      height: 44px;
+      width: auto;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .greeting {
+      font-size: 12px;
+      color: #666;
+      letter-spacing: 0.3px;
+    }
+
+    .greeting strong {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .plan-pill {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-line);
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+    }
+
+    /* ── MAIN GRID ──────────────────────────────────── */
+    .main {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* ── LEFT SIDEBAR ───────────────────────────────── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(168,136,31,0.1) 0%, rgba(237,229,213,0.5) 100%);
+    }
+
+    .sidebar-label {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--gold);
+      padding: 0 4px;
+      margin-top: 4px;
+    }
+
+    .metric {
+      background: #F7F2E8;
+      border: 1px solid rgba(201,162,39,0.35);
+      box-shadow: 0 2px 12px rgba(201,162,39,0.12);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .metric::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 2px; height: 100%;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+
+    .metric:hover { border-color: rgba(201,162,39,0.5); box-shadow: 0 4px 20px rgba(201,162,39,0.12); }
+
+    .metric-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .metric-num.green { color: var(--green); }
+    .metric-num.amber { color: var(--amber); }
+    .metric-num.red   { color: var(--red); }
+    .metric-num.gold  { color: var(--gold); }
+
+    .metric-unit {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .metric-name {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .metric-goal {
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 3px;
+    }
+
+    .metric-goal em {
+      color: var(--gold);
+      font-style: normal;
+      font-weight: 700;
+    }
+
+    .trend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .trend-arrow {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .streak-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+    }
+
+    .dot.lit {
+      background: var(--gold);
+      border-color: var(--gold);
+      box-shadow: 0 0 6px rgba(201,162,39,0.5);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 4px 0;
+    }
+
+    /* ── RIGHT PANEL ────────────────────────────────── */
+    .content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .coaching-wrap {
+      flex: 1;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .section-head { }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0A0A0A;
+      margin-bottom: 4px;
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: #999;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── LOG FORM ────────────────────────────────────── */
+    .log-form {
+      background: #F7F2E8;
+      border: 1px solid rgba(201,162,39,0.4);
+      box-shadow: 0 2px 16px rgba(201,162,39,0.14);
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .log-form::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 160px auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .field input {
+      width: 100%;
+      background: #F0EBE0;
+      border: 1px solid rgba(201,162,39,0.3);
+      color: #1a1a1a;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,162,39,0.1);
+      background: #F7F2E8;
+    }
+
+    .field input::placeholder { color: #bbb; }
+
+    .btn-log {
+      background: var(--gold);
+      color: #FFFFFF;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 0 24px;
+      height: 46px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-log::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-log:hover { background: #b8901f; }
+    .btn-log:active { transform: scale(0.97); }
+    .btn-log:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
+
+    /* ── HISTORY ─────────────────────────────────────── */
+    .history {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 360px;
+      padding-right: 2px;
+    }
+
+    .history::-webkit-scrollbar { width: 3px; }
+    .history::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .entry {
+      background: #F7F2E8;
+      border: 1px solid rgba(201,162,39,0.35);
+      box-shadow: 0 2px 10px rgba(201,162,39,0.1);
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .entry::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold-line), transparent);
+    }
+
+    .entry-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 12px;
+    }
+
+    .entry-meal {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a1a;
+      flex: 1;
+    }
+
+    .entry-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .glucose-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .glucose-badge.green { background: rgba(39,201,106,0.12); color: var(--green); }
+    .glucose-badge.amber { background: rgba(245,166,35,0.12); color: var(--amber); }
+    .glucose-badge.red   { background: rgba(232,64,64,0.12);  color: var(--red); }
+
+    .entry-time {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .entry-response {
+      font-size: 13px;
+      line-height: 1.75;
+      color: #555;
+      border-left: 2px solid var(--gold-line);
+      padding-left: 12px;
+    }
+
+    .entry-response.loading {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 48px 24px;
+      color: #aaa;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .empty p {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #bbb;
+    }
+
+    /* ── CHART ───────────────────────────────────────── */
+    .chart-section {
+      border-top: 1px solid var(--border);
+      padding: 20px 32px 24px;
+      background: linear-gradient(180deg, rgba(168,136,31,0.08) 0%, rgba(237,229,213,0.8) 100%);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .chart-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .legend-pip {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .chart-box { height: 130px; }
+
+    /* ── MOBILE ──────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 16px;
+        background: rgba(255,255,255,0.7);
+      }
+
+      .sidebar-label { width: 100%; margin: 0; }
+      .metric { flex: 1 1 130px; }
+      .divider { width: 100%; }
+
+      .coaching-wrap { padding: 20px 16px; gap: 16px; }
+      .chart-section { padding: 16px; }
+
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .btn-log { width: 100%; height: 52px; }
+
+      .header-right .greeting { display: none; }
+    }
+
+    /* ── UPGRADE BANNER ─────────────────────────────────── */
+    .upgrade-banner {
+      background: linear-gradient(135deg, rgba(168,136,31,0.15) 0%, rgba(237,229,213,0.9) 100%);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 4px;
+    }
+
+    .upgrade-banner p {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.5;
+    }
+
+    .upgrade-banner strong {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .btn-upgrade {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 8px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-upgrade:hover {
+      background: var(--gold);
+      color: #FFFFFF;
+    }
+
+    /* ── TABS ────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      gap: 0;
+    }
+
+    .tab {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #aaa;
+      padding: 14px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      user-select: none;
+    }
+
+    .tab:hover { color: #333; }
+
+    .tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* ── COMMUNITY PANEL ─────────────────────────────── */
+    .community-panel {
+      flex: 1;
+      padding: 28px 32px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .community-panel.active { display: flex; }
+
+    .locked-community {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 24px;
+      gap: 16px;
+    }
+
+    .lock-icon {
+      font-size: 48px;
+      opacity: 0.4;
+    }
+
+    .lock-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+
+    .lock-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 320px;
+    }
+
+    .lock-features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .lock-feature {
+      font-size: 12px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lock-feature::before {
+      content: '✦';
+      color: var(--gold);
+      font-size: 8px;
+    }
+
+    /* ── PRIORITY BADGE ──────────────────────────────── */
+    .priority-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-line);
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 2px 8px;
+      margin-left: 8px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+<style>
+.ghl-page, .page-content, [class*="page-wrap"], [class*="section"] {
+  padding: 0 !important; margin: 0 !important;
+  max-width: 100% !important; width: 100% !important;
+}
+#bss-page {
+  position: relative !important;
+  width: 100vw !important; min-height: 100vh !important;
+  margin: 0 !important; padding: 0 !important;
+  overflow-x: hidden !important;
+}
+</style>
+<div id="bss-page">
+<!-- HEADER -->
+<header class="header">
+  <img class="header-logo"
+    src="https://assets.cdn.filesafe.space/NFcW3r75ZFk4gPB7qv8Y/media/6a2719412db4a9d19adec2de.png"
+    alt="The Blood Sugar S.H.I.F.T.">
+  <div class="header-right">
+    <div class="greeting">Welcome back, <strong id="user-name">{{contact.first_name}}</strong></div>
+    <div class="plan-pill" id="plan-type">{{contact.plan_type}}</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Today</div>
+
+    <div class="metric">
+      <div class="metric-num gold" id="fasting-val">—</div>
+      <div class="metric-unit">mg/dL</div>
+      <div class="metric-name">Fasting Glucose</div>
+      <div class="metric-goal">Goal: <em>&lt;100</em></div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-num amber" id="postmeal-val">—</div>
+      <div class="metric-unit">mg/dL</div>
+      <div class="metric-name">Post-Meal (2hr)</div>
+      <div class="metric-goal">Goal: <em>&lt;140</em></div>
+    </div>
+
+    <hr class="divider">
+    <div class="sidebar-label">30-Day Progress</div>
+
+    <div class="metric">
+      <div class="trend-row">
+        <div class="trend-arrow" id="trend-arrow">→</div>
+        <div>
+          <div class="metric-num green" id="trend-val" style="font-size:28px">—</div>
+          <div class="metric-unit">pts dropped</div>
+        </div>
+      </div>
+      <div class="metric-name">Glucose Trend</div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-num gold" id="avg-val" style="font-size:28px">—</div>
+      <div class="metric-unit">mg/dL</div>
+      <div class="metric-name">Weekly Average</div>
+    </div>
+
+    <hr class="divider">
+    <div class="sidebar-label">14-Day Progress</div>
+
+    <div class="metric">
+      <div class="metric-num gold" id="meals-val" style="font-size:28px">0</div>
+      <div class="metric-unit">meals logged</div>
+      <div class="metric-name">Guarantee Tracker</div>
+      <div class="streak-row" id="streak"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- TABS -->
+    <div class="tabs" id="tabs">
+      <div class="tab active" onclick="switchTab('coaching', this)">My Coaching</div>
+      <div class="tab" id="community-tab" onclick="switchTab('community', this)">Community</div>
+    </div>
+
+    <!-- COACHING PANEL -->
+    <div class="coaching-wrap" id="panel-coaching">
+
+      <div class="section-head">
+        <div class="section-title">Your S.H.I.F.T. Coach</div>
+        <div class="section-sub">Log a meal + reading — your coach responds in seconds.</div>
+      </div>
+
+      <!-- FORM -->
+      <div class="log-form">
+        <!-- Mode Toggle -->
+        <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);">
+          <button id="mode-check" onclick="setMode('check')"
+            style="flex:1;padding:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--gold);">
+            Morning S.H.I.F.T.
+          </button>
+          <button id="mode-pre" onclick="setMode('pre')"
+            style="flex:1;padding:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;border:none;cursor:pointer;transition:all 0.2s;background:var(--gold);color:#fff;">
+            Before I Eat
+          </button>
+          <button id="mode-post" onclick="setMode('post')"
+            style="flex:1;padding:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;border:none;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--gold);">
+            After I Ate
+          </button>
+        </div>
+        <div class="form-row" id="form-row">
+          <div class="field" id="meal-field">
+            <label id="meal-label">What are you planning to eat?</label>
+            <input type="text" id="meal-input"
+              placeholder="e.g. Grilled salmon, roasted broccoli, olive oil…">
+          </div>
+          <div class="field">
+            <label>Current Glucose (mg/dL)</label>
+            <input type="number" id="glucose-input" min="50" max="400" placeholder="e.g. 118">
+          </div>
+          <button class="btn-log" id="log-btn" onclick="logMeal()">
+            Ask Coach
+          </button>
+        </div>
+        <div id="mode-hint" style="font-size:11px;color:#aaa;margin-top:10px;font-style:italic;">
+          💡 Tell your coach what you're thinking of eating — get feedback before you commit.
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="history" id="history">
+        <div class="empty" id="empty-state">
+          <div class="empty-icon">💬</div>
+          <p>Your coaching responses appear here.<br>Log your first meal to get started.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COMMUNITY PANEL -->
+    <div class="community-panel" id="panel-community">
+      <!-- Filled by JS based on plan type -->
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-section">
+      <div class="chart-header">
+        <div class="chart-title">30-Day Glucose Trend</div>
+        <div class="chart-legend">
+          <span><span class="legend-pip" style="background:#C9A227"></span>Readings</span>
+          <span><span class="legend-pip" style="background:rgba(39,201,106,0.4)"></span>Target</span>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── PAYWALL GATE — re-enable after testing ───────────────
+// Temporarily disabled to test flow
+// (function() {
+//   try {
+//     const session = JSON.parse(localStorage.getItem('bss_session') || '{}');
+//     const age     = Date.now() - (session.timestamp || 0);
+//     const valid   = session.verified && age < 7 * 24 * 60 * 60 * 1000;
+//     if (!valid) {
+//       window.location.href = 'https://www.thebloodsugarshift.com/login';
+//     }
+//   } catch(e) {
+//     window.location.href = 'https://www.thebloodsugarshift.com/login';
+//   }
+// })();
+
+// ── CONFIG — GHL merge tags ───────────────────────────────
+const CONFIG = {
+  WEBHOOK_URL:     'YOUR_CLAUDE_WEBHOOK_URL',
+  USER_NAME:       ('{{contact.first_name}}' && !('{{contact.first_name}}'.includes('{{'))) ? '{{contact.first_name}}' : 'Friend',
+  PLAN_TYPE:       ('{{contact.plan_type}}' && !('{{contact.plan_type}}'.includes('{{'))) ? '{{contact.plan_type}}' : 'Monthly',
+  FASTING:         parseFloat('{{contact.glucose_fasting}}') || null,
+  POSTMEAL:        parseFloat('{{contact.glucose_postmeal}}') || null,
+  CONTACT_ID:      '{{contact.id}}',
+  CONTACT_EMAIL:   '{{contact.email}}',
+  ANTHROPIC_KEY:   'PASTE_YOUR_NEW_API_KEY_HERE',
+};
+
+// ── PLAN LOGIC ───────────────────────────────────────────
+const isLifetime = CONFIG.PLAN_TYPE.toLowerCase().includes('lifetime');
+
+// ── STATE ─────────────────────────────────────────────────
+let logs     = JSON.parse(localStorage.getItem('bss_logs')     || '[]');
+let readings = JSON.parse(localStorage.getItem('bss_readings') || '[]');
+let glChart;
+
+// ── INIT ──────────────────────────────────────────────────
+(function init() {
+  document.getElementById('user-name').textContent = CONFIG.USER_NAME;
+
+  // ── PLAN-BASED UI ──────────────────────────────────────
+  if (!isLifetime) {
+    // Show upgrade banner above form
+    const banner = document.createElement('div');
+    banner.className = 'upgrade-banner';
+    banner.innerHTML = `
+      <p><strong>Lifetime Access</strong> unlocks the private S.H.I.F.T. Community,
+      companion book, and priority coaching.</p>
+      <a class="btn-upgrade" href="https://links.theekklesiasuite.com/payment-link/6a2728f571a0aa761e463a34"
+         target="_blank">Upgrade → $497</a>`;
+    const form = document.querySelector('.log-form');
+    form.parentNode.insertBefore(banner, form);
+
+    // Lock community tab
+    document.getElementById('community-tab').innerHTML =
+      'Community <span style="font-size:9px;opacity:0.5;">🔒</span>';
+    document.getElementById('panel-community').innerHTML = `
+      <div class="locked-community">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Lifetime Members Only</div>
+        <div class="lock-sub">Join the private S.H.I.F.T. Community where members share wins,
+        protocols, and hold each other accountable.</div>
+        <div class="lock-features">
+          <div class="lock-feature">Weekly glucose challenges</div>
+          <div class="lock-feature">Member win spotlights</div>
+          <div class="lock-feature">Pastor's weekly encouragement</div>
+          <div class="lock-feature">Live Q&amp;A sessions</div>
+          <div class="lock-feature">Protocol tips &amp; meal ideas</div>
+        </div>
+        <a class="btn-upgrade" href="https://links.theekklesiasuite.com/payment-link/6a2728f571a0aa761e463a34"
+           target="_blank">Upgrade to Lifetime — $497</a>
+      </div>`;
+  } else {
+    // Lifetime — show priority badge + community access
+    const badge = document.createElement('span');
+    badge.className = 'priority-badge';
+    badge.textContent = '✦ Priority';
+    document.querySelector('.plan-pill').after(badge);
+
+    document.getElementById('panel-community').innerHTML = `
+      <div style="padding:28px 0; text-align:center;">
+        <div style="font-family:Playfair Display,serif;font-size:22px;font-weight:800;margin-bottom:12px;">
+          Welcome to the Community
+        </div>
+        <p style="color:#888;font-size:13px;margin-bottom:24px;">
+          You have full access to the private S.H.I.F.T. Community.
+        </p>
+        <a class="btn-upgrade"
+           href="https://app.thebloodsugarshift.com"
+           target="_blank"
+           style="background:var(--gold);color:var(--black);padding:14px 32px;font-size:11px;">
+          Enter the Community →
+        </a>
+      </div>`;
+  }
+
+  document.getElementById('user-name').textContent = CONFIG.USER_NAME;
+  document.getElementById('plan-type').textContent = CONFIG.PLAN_TYPE;
+  if (CONFIG.FASTING)  setMetric('fasting-val',  CONFIG.FASTING,  false);
+  if (CONFIG.POSTMEAL) setMetric('postmeal-val',  CONFIG.POSTMEAL, true);
+  renderHistory();
+  updateStats();
+  renderChart();
+  buildStreak();
+})();
+
+// ── HELPERS ───────────────────────────────────────────────
+function glucoseClass(v, post) {
+  if (post) return v < 140 ? 'green' : v < 180 ? 'amber' : 'red';
+  return v < 100 ? 'green' : v < 126 ? 'amber' : 'red';
+}
+
+function setMetric(id, val, post) {
+  const el = document.getElementById(id);
+  el.textContent = val;
+  el.className = 'metric-num ' + glucoseClass(val, post);
+}
+
+function updateStats() {
+  const vals = readings.map(r => r.v);
+  document.getElementById('meals-val').textContent = logs.length;
+
+  if (vals.length >= 2) {
+    const diff = vals[0] - vals[vals.length - 1];
+    const tEl = document.getElementById('trend-val');
+    const aEl = document.getElementById('trend-arrow');
+    tEl.textContent = Math.abs(diff);
+    if (diff > 0)      { tEl.className = 'metric-num green'; aEl.textContent = '↓'; }
+    else if (diff < 0) { tEl.className = 'metric-num red';   aEl.textContent = '↑'; }
+    else               { tEl.className = 'metric-num amber';  aEl.textContent = '→'; }
+  }
+
+  if (vals.length) {
+    const recent = vals.slice(-7);
+    const avg = Math.round(recent.reduce((a,b) => a+b, 0) / recent.length);
+    const aEl = document.getElementById('avg-val');
+    aEl.textContent = avg;
+    aEl.className = 'metric-num ' + glucoseClass(avg, false);
+  }
+}
+
+function buildStreak() {
+  const c = document.getElementById('streak');
+  c.innerHTML = '';
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < logs.length ? ' lit' : '');
+    c.appendChild(d);
+  }
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-coaching').style.display   = tab === 'coaching'   ? 'flex' : 'none';
+  document.getElementById('panel-community').style.display  = tab === 'community'  ? 'flex' : 'none';
+  // Keep coaching-wrap as flex
+  if (tab === 'coaching') document.getElementById('panel-coaching').style.flexDirection = 'column';
+}
+
+// ── MEAL MODE ────────────────────────────────────────────
+let mealMode = 'pre'; // 'pre' = before eating, 'post' = after eating
+
+function setMode(mode) {
+  mealMode = mode;
+  const preBtn   = document.getElementById('mode-pre');
+  const postBtn  = document.getElementById('mode-post');
+  const checkBtn = document.getElementById('mode-check');
+  const label    = document.getElementById('meal-label');
+  const hint     = document.getElementById('mode-hint');
+  const logBtn   = document.getElementById('log-btn');
+  const mealFld  = document.getElementById('meal-field');
+
+  // Reset all buttons
+  [preBtn, postBtn, checkBtn].forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--gold)';
+  });
+
+  if (mode === 'pre') {
+    preBtn.style.background  = 'var(--gold)';
+    preBtn.style.color       = '#fff';
+    mealFld.style.display    = 'block';
+    label.textContent        = 'What are you planning to eat?';
+    hint.textContent         = "💡 Tell your coach what you are thinking of eating — get feedback before you commit.";
+    logBtn.textContent       = 'Ask Coach';
+    document.getElementById('meal-input').placeholder = 'e.g. Salmon and rice, or maybe a burger…';
+  } else if (mode === 'post') {
+    postBtn.style.background = 'var(--gold)';
+    postBtn.style.color      = '#fff';
+    mealFld.style.display    = 'block';
+    label.textContent        = 'What did you eat?';
+    hint.textContent         = "📊 Log what you ate and your reading — your coach will assess the impact.";
+    logBtn.textContent       = 'Log & Coach';
+    document.getElementById('meal-input').placeholder = 'e.g. Grilled salmon, roasted broccoli, olive oil…';
+  } else {
+    checkBtn.style.background = 'var(--gold)';
+    checkBtn.style.color      = '#fff';
+    mealFld.style.display     = 'none';
+    hint.textContent          = "🌅 Enter your fasting reading — your coach will track your progress and celebrate every drop.";
+    logBtn.textContent        = 'Check In';
+  }
+}
+
+// ── LOG MEAL ──────────────────────────────────────────────
+async function logMeal() {
+  const meal    = document.getElementById('meal-input').value.trim();
+  const glucose = parseInt(document.getElementById('glucose-input').value);
+  const btn     = document.getElementById('log-btn');
+
+  if (mealMode !== 'check' && !meal) {
+    document.getElementById('meal-input').focus();
+    return;
+  }
+  if (!glucose || glucose < 50 || glucose > 400) {
+    document.getElementById('glucose-input').focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Coaching…';
+
+  const now   = new Date();
+  const entry = {
+    id:       Date.now(),
+    meal,
+    glucose,
+    mode:     mealMode,
+    time:     now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    date:     now.toLocaleDateString(),
+    response: null,
+    loading:  true
+  };
+
+  logs.unshift(entry);
+  readings.push({ v: glucose, t: entry.time, d: entry.date });
+
+  setMetric('postmeal-val', glucose, true);
+  updateStats();
+  buildStreak();
+  renderHistory();
+  renderChart();
+
+  document.getElementById('meal-input').value = '';
+  document.getElementById('glucose-input').value = '';
+
+  // Call Claude API directly
+  try {
+    const context = logs.slice(1,6).map(h => `${h.date} ${h.time}: ${h.meal} → ${h.glucose}`).join('\n');
+
+    // Also notify GHL webhook for contact tracking (fire and forget)
+    fetch(CONFIG.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        meal, glucose,
+        user_name:      CONFIG.USER_NAME,
+        contact_id:     CONFIG.CONTACT_ID,
+        email:          CONFIG.CONTACT_EMAIL,
+        plan_type:      CONFIG.PLAN_TYPE,
+        recent_history: context,
+        weekly_avg:     document.getElementById('avg-val').textContent
+      })
+    }).catch(() => {}); // silent fail — GHL tracking only
+
+    // Call Claude directly for real-time response
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CONFIG.ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        system: `You are a personal glucose wellness coach for The Blood Sugar S.H.I.F.T. program created by Pastor Terrrence. Your client is ${CONFIG.USER_NAME}. Their goal is stable glucose, restored energy, and reversing neuropathy symptoms through the S.H.I.F.T. framework — Suppositions, Habits, Industrious Action, Feedback Loop, Terms of Life. They may be on Mounjaro/tirzepatide. Be warm, encouraging, specific, and brief — 2-3 sentences max. Never diagnose, treat, or give medical advice. Always reinforce that control is possible.`,
+        messages: [{
+          role: 'user',
+          content: mealMode === 'pre'
+            ? `My current glucose is ${glucose} mg/dL. I am thinking of eating: ${meal}. Recent history: ${context}. Weekly average: ${document.getElementById('avg-val').textContent} mg/dL. Should I eat this? What should I watch for? Give me pre-meal coaching.`
+            : mealMode === 'post'
+            ? `I just ate: ${meal}. My glucose reading is ${glucose} mg/dL. Recent history: ${context}. Weekly average: ${document.getElementById('avg-val').textContent} mg/dL. Assess this meal and give me post-meal coaching.`
+            : `My glucose reading right now is ${glucose} mg/dL. Recent history: ${context}. Weekly average: ${document.getElementById('avg-val').textContent} mg/dL. No meal — just checking in. Acknowledge this reading, celebrate any improvement, identify any trend, and give me one word of encouragement. Keep it warm and brief.`
+        }]
+      })
+    });
+    const data = await res.json();
+    entry.response = data.content?.[0]?.text || "Great log! Keep building that pattern.";
+  } catch(err) {
+    entry.response = "Log saved. Your coach will respond shortly — keep tracking!";
+  }
+
+  entry.loading = false;
+  save();
+  renderHistory();
+
+  btn.disabled = false;
+  btn.textContent = 'Log & Coach';
+}
+
+// ── RENDER HISTORY ────────────────────────────────────────
+function makeEntryHTML(entry) {
+  const cls = entry.glucose < 140 ? 'green' : entry.glucose < 180 ? 'amber' : 'red';
+  const modeLabel = entry.mode === 'pre' ? 'Pre-meal' : entry.mode === 'check' ? 'Morning S.H.I.F.T.' : 'Post-meal';
+  const modeColor = entry.mode === 'pre' ? 'color:var(--gold);background:var(--gold-dim);' : entry.mode === 'check' ? 'color:#1a9e4f;background:rgba(26,158,79,0.1);' : 'color:#888;background:rgba(0,0,0,0.05);';
+  const mealText  = entry.mode === 'check' ? 'Morning S.H.I.F.T.' : entry.meal;
+  const div = document.createElement('div');
+  div.className = 'entry';
+  div.innerHTML =
+    '<div class="entry-top">' +
+      '<div class="entry-meal">' +
+        '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;margin-right:6px;' + modeColor + '">' + modeLabel + '</span>' +
+        mealText +
+      '</div>' +
+      '<div class="entry-badges">' +
+        '<div class="glucose-badge ' + cls + '">' + entry.glucose + ' mg/dL</div>' +
+        '<div class="entry-time">' + entry.date + ' · ' + entry.time + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="entry-response' + (entry.loading ? ' loading' : '') + '">' +
+      (entry.loading ? '⏳ Getting your personalized coaching…' : (entry.response || 'Response pending…')) +
+    '</div>';
+  return div;
+}
+
+function renderHistory() {
+  const wrap  = document.getElementById('history');
+  const empty = document.getElementById('empty-state');
+  wrap.querySelectorAll('.entry, .load-more-btn').forEach(e => e.remove());
+
+  if (!logs.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  logs.slice(0, 30).forEach(entry => wrap.appendChild(makeEntryHTML(entry)));
+
+  const hidden = logs.length - 30;
+  if (hidden > 0) {
+    const more = document.createElement('div');
+    more.className = 'load-more-btn';
+    more.style.cssText = 'text-align:center;padding:16px;font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:1px dashed var(--border);margin-top:4px;';
+    more.textContent = '+ ' + hidden + ' older entries';
+    more.onclick = showAllHistory;
+    wrap.appendChild(more);
+  }
+}
+
+function showAllHistory() {
+  const wrap = document.getElementById('history');
+  wrap.querySelectorAll('.entry, .load-more-btn').forEach(e => e.remove());
+  logs.forEach(entry => wrap.appendChild(makeEntryHTML(entry)));
+
+  const collapse = document.createElement('div');
+  collapse.style.cssText = 'text-align:center;padding:16px;font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:1px dashed var(--border);margin-top:4px;';
+  collapse.textContent = 'Show less';
+  collapse.onclick = renderHistory;
+  wrap.appendChild(collapse);
+}
+
+// ── CHART ─────────────────────────────────────────────────
+function renderChart() {
+  const ctx    = document.getElementById('chart').getContext('2d');
+  const recent = readings.slice(-30);
+  const labels = recent.map((_, i) => i % 5 === 0 ? recent[i].d : '');
+  const data   = recent.map(r => r.v);
+
+  if (glChart) glChart.destroy();
+
+  glChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          data,
+          borderColor: '#A8881F',
+          backgroundColor: 'rgba(201,162,39,0.06)',
+          borderWidth: 2,
+          pointBackgroundColor: data.map(v => v < 140 ? '#27C96A' : v < 180 ? '#F5A623' : '#E84040'),
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          data: data.map(() => 140),
+          borderColor: 'rgba(39,201,106,0.25)',
+          borderDash: [4,4],
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111',
+          borderColor: '#A8881F',
+          borderWidth: 1,
+          titleColor: '#C9A227',
+          bodyColor: '#ccc',
+          callbacks: { label: c => ` ${c.parsed.y} mg/dL` }
+        }
+      },
+      scales: {
+        x: {
+          grid:  { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#555', font: { size: 9 } }
+        },
+        y: {
+          min: 60, max: 300,
+          grid:  { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#555', font: { size: 9 }, callback: v => v }
+        }
+      }
+    }
+  });
+}
+
+// ── PERSIST ───────────────────────────────────────────────
+function save() {
+  // Keep last 90 entries max to prevent localStorage bloat
+  if (logs.length > 90)     logs     = logs.slice(0, 90);
+  if (readings.length > 90) readings = readings.slice(0, 90);
+  localStorage.setItem('bss_logs',     JSON.stringify(logs));
+  localStorage.setItem('bss_readings', JSON.stringify(readings));
+}
+
+// Enter key on glucose field submits
+document.getElementById('glucose-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') logMeal();
+});
+</script>
+</div>
+<script>
+if (!window.__bss_dashboard_loaded) {
+  window.__bss_dashboard_loaded = true;
+
+
+// ── PAYWALL GATE — re-enable after testing ───────────────
+// Temporarily disabled to test flow
+// (function() {
+//   try {
+//     const session = JSON.parse(localStorage.getItem('bss_session') || '{}');
+//     const age     = Date.now() - (session.timestamp || 0);
+//     const valid   = session.verified && age < 7 * 24 * 60 * 60 * 1000;
+//     if (!valid) {
+//       window.location.href = 'https://www.thebloodsugarshift.com/login';
+//     }
+//   } catch(e) {
+//     window.location.href = 'https://www.thebloodsugarshift.com/login';
+//   }
+// })();
+
+// ── CONFIG — GHL merge tags ───────────────────────────────
+const CONFIG = {
+  WEBHOOK_URL:     'YOUR_CLAUDE_WEBHOOK_URL',
+  USER_NAME:       ('{{contact.first_name}}' && !('{{contact.first_name}}'.includes('{{'))) ? '{{contact.first_name}}' : 'Friend',
+  PLAN_TYPE:       ('{{contact.plan_type}}' && !('{{contact.plan_type}}'.includes('{{'))) ? '{{contact.plan_type}}' : 'Monthly',
+  FASTING:         parseFloat('{{contact.glucose_fasting}}') || null,
+  POSTMEAL:        parseFloat('{{contact.glucose_postmeal}}') || null,
+  CONTACT_ID:      '{{contact.id}}',
+  CONTACT_EMAIL:   '{{contact.email}}',
+  ANTHROPIC_KEY:   'PASTE_YOUR_NEW_API_KEY_HERE',
+};
+
+// ── PLAN LOGIC ───────────────────────────────────────────
+const isLifetime = CONFIG.PLAN_TYPE.toLowerCase().includes('lifetime');
+
+// ── STATE ─────────────────────────────────────────────────
+let logs     = JSON.parse(localStorage.getItem('bss_logs')     || '[]');
+let readings = JSON.parse(localStorage.getItem('bss_readings') || '[]');
+let glChart;
+
+// ── INIT ──────────────────────────────────────────────────
+(function init() {
+  document.getElementById('user-name').textContent = CONFIG.USER_NAME;
+
+  // ── PLAN-BASED UI ──────────────────────────────────────
+  if (!isLifetime) {
+    // Show upgrade banner above form
+    const banner = document.createElement('div');
+    banner.className = 'upgrade-banner';
+    banner.innerHTML = `
+      <p><strong>Lifetime Access</strong> unlocks the private S.H.I.F.T. Community,
+      companion book, and priority coaching.</p>
+      <a class="btn-upgrade" href="https://links.theekklesiasuite.com/payment-link/6a2728f571a0aa761e463a34"
+         target="_blank">Upgrade → $497</a>`;
+    const form = document.querySelector('.log-form');
+    form.parentNode.insertBefore(banner, form);
+
+    // Lock community tab
+    document.getElementById('community-tab').innerHTML =
+      'Community <span style="font-size:9px;opacity:0.5;">🔒</span>';
+    document.getElementById('panel-community').innerHTML = `
+      <div class="locked-community">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Lifetime Members Only</div>
+        <div class="lock-sub">Join the private S.H.I.F.T. Community where members share wins,
+        protocols, and hold each other accountable.</div>
+        <div class="lock-features">
+          <div class="lock-feature">Weekly glucose challenges</div>
+          <div class="lock-feature">Member win spotlights</div>
+          <div class="lock-feature">Pastor's weekly encouragement</div>
+          <div class="lock-feature">Live Q&amp;A sessions</div>
+          <div class="lock-feature">Protocol tips &amp; meal ideas</div>
+        </div>
+        <a class="btn-upgrade" href="https://links.theekklesiasuite.com/payment-link/6a2728f571a0aa761e463a34"
+           target="_blank">Upgrade to Lifetime — $497</a>
+      </div>`;
+  } else {
+    // Lifetime — show priority badge + community access
+    const badge = document.createElement('span');
+    badge.className = 'priority-badge';
+    badge.textContent = '✦ Priority';
+    document.querySelector('.plan-pill').after(badge);
+
+    document.getElementById('panel-community').innerHTML = `
+      <div style="padding:28px 0; text-align:center;">
+        <div style="font-family:Playfair Display,serif;font-size:22px;font-weight:800;margin-bottom:12px;">
+          Welcome to the Community
+        </div>
+        <p style="color:#888;font-size:13px;margin-bottom:24px;">
+          You have full access to the private S.H.I.F.T. Community.
+        </p>
+        <a class="btn-upgrade"
+           href="https://app.thebloodsugarshift.com"
+           target="_blank"
+           style="background:var(--gold);color:var(--black);padding:14px 32px;font-size:11px;">
+          Enter the Community →
+        </a>
+      </div>`;
+  }
+
+  document.getElementById('user-name').textContent = CONFIG.USER_NAME;
+  document.getElementById('plan-type').textContent = CONFIG.PLAN_TYPE;
+  if (CONFIG.FASTING)  setMetric('fasting-val',  CONFIG.FASTING,  false);
+  if (CONFIG.POSTMEAL) setMetric('postmeal-val',  CONFIG.POSTMEAL, true);
+  renderHistory();
+  updateStats();
+  renderChart();
+  buildStreak();
+})();
+
+// ── HELPERS ───────────────────────────────────────────────
+function glucoseClass(v, post) {
+  if (post) return v < 140 ? 'green' : v < 180 ? 'amber' : 'red';
+  return v < 100 ? 'green' : v < 126 ? 'amber' : 'red';
+}
+
+function setMetric(id, val, post) {
+  const el = document.getElementById(id);
+  el.textContent = val;
+  el.className = 'metric-num ' + glucoseClass(val, post);
+}
+
+function updateStats() {
+  const vals = readings.map(r => r.v);
+  document.getElementById('meals-val').textContent = logs.length;
+
+  if (vals.length >= 2) {
+    const diff = vals[0] - vals[vals.length - 1];
+    const tEl = document.getElementById('trend-val');
+    const aEl = document.getElementById('trend-arrow');
+    tEl.textContent = Math.abs(diff);
+    if (diff > 0)      { tEl.className = 'metric-num green'; aEl.textContent = '↓'; }
+    else if (diff < 0) { tEl.className = 'metric-num red';   aEl.textContent = '↑'; }
+    else               { tEl.className = 'metric-num amber';  aEl.textContent = '→'; }
+  }
+
+  if (vals.length) {
+    const recent = vals.slice(-7);
+    const avg = Math.round(recent.reduce((a,b) => a+b, 0) / recent.length);
+    const aEl = document.getElementById('avg-val');
+    aEl.textContent = avg;
+    aEl.className = 'metric-num ' + glucoseClass(avg, false);
+  }
+}
+
+function buildStreak() {
+  const c = document.getElementById('streak');
+  c.innerHTML = '';
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < logs.length ? ' lit' : '');
+    c.appendChild(d);
+  }
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-coaching').style.display   = tab === 'coaching'   ? 'flex' : 'none';
+  document.getElementById('panel-community').style.display  = tab === 'community'  ? 'flex' : 'none';
+  // Keep coaching-wrap as flex
+  if (tab === 'coaching') document.getElementById('panel-coaching').style.flexDirection = 'column';
+}
+
+// ── MEAL MODE ────────────────────────────────────────────
+let mealMode = 'pre'; // 'pre' = before eating, 'post' = after eating
+
+function setMode(mode) {
+  mealMode = mode;
+  const preBtn   = document.getElementById('mode-pre');
+  const postBtn  = document.getElementById('mode-post');
+  const checkBtn = document.getElementById('mode-check');
+  const label    = document.getElementById('meal-label');
+  const hint     = document.getElementById('mode-hint');
+  const logBtn   = document.getElementById('log-btn');
+  const mealFld  = document.getElementById('meal-field');
+
+  // Reset all buttons
+  [preBtn, postBtn, checkBtn].forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--gold)';
+  });
+
+  if (mode === 'pre') {
+    preBtn.style.background  = 'var(--gold)';
+    preBtn.style.color       = '#fff';
+    mealFld.style.display    = 'block';
+    label.textContent        = 'What are you planning to eat?';
+    hint.textContent         = "💡 Tell your coach what you are thinking of eating — get feedback before you commit.";
+    logBtn.textContent       = 'Ask Coach';
+    document.getElementById('meal-input').placeholder = 'e.g. Salmon and rice, or maybe a burger…';
+  } else if (mode === 'post') {
+    postBtn.style.background = 'var(--gold)';
+    postBtn.style.color      = '#fff';
+    mealFld.style.display    = 'block';
+    label.textContent        = 'What did you eat?';
+    hint.textContent         = "📊 Log what you ate and your reading — your coach will assess the impact.";
+    logBtn.textContent       = 'Log & Coach';
+    document.getElementById('meal-input').placeholder = 'e.g. Grilled salmon, roasted broccoli, olive oil…';
+  } else {
+    checkBtn.style.background = 'var(--gold)';
+    checkBtn.style.color      = '#fff';
+    mealFld.style.display     = 'none';
+    hint.textContent          = "🌅 Enter your fasting reading — your coach will track your progress and celebrate every drop.";
+    logBtn.textContent        = 'Check In';
+  }
+}
+
+// ── LOG MEAL ──────────────────────────────────────────────
+async function logMeal() {
+  const meal    = document.getElementById('meal-input').value.trim();
+  const glucose = parseInt(document.getElementById('glucose-input').value);
+  const btn     = document.getElementById('log-btn');
+
+  if (mealMode !== 'check' && !meal) {
+    document.getElementById('meal-input').focus();
+    return;
+  }
+  if (!glucose || glucose < 50 || glucose > 400) {
+    document.getElementById('glucose-input').focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Coaching…';
+
+  const now   = new Date();
+  const entry = {
+    id:       Date.now(),
+    meal,
+    glucose,
+    mode:     mealMode,
+    time:     now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    date:     now.toLocaleDateString(),
+    response: null,
+    loading:  true
+  };
+
+  logs.unshift(entry);
+  readings.push({ v: glucose, t: entry.time, d: entry.date });
+
+  setMetric('postmeal-val', glucose, true);
+  updateStats();
+  buildStreak();
+  renderHistory();
+  renderChart();
+
+  document.getElementById('meal-input').value = '';
+  document.getElementById('glucose-input').value = '';
+
+  // Call Claude API directly
+  try {
+    const context = logs.slice(1,6).map(h => `${h.date} ${h.time}: ${h.meal} → ${h.glucose}`).join('\n');
+
+    // Also notify GHL webhook for contact tracking (fire and forget)
+    fetch(CONFIG.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        meal, glucose,
+        user_name:      CONFIG.USER_NAME,
+        contact_id:     CONFIG.CONTACT_ID,
+        email:          CONFIG.CONTACT_EMAIL,
+        plan_type:      CONFIG.PLAN_TYPE,
+        recent_history: context,
+        weekly_avg:     document.getElementById('avg-val').textContent
+      })
+    }).catch(() => {}); // silent fail — GHL tracking only
+
+    // Call Claude directly for real-time response
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CONFIG.ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        system: `You are a personal glucose wellness coach for The Blood Sugar S.H.I.F.T. program created by Pastor Terrrence. Your client is ${CONFIG.USER_NAME}. Their goal is stable glucose, restored energy, and reversing neuropathy symptoms through the S.H.I.F.T. framework — Suppositions, Habits, Industrious Action, Feedback Loop, Terms of Life. They may be on Mounjaro/tirzepatide. Be warm, encouraging, specific, and brief — 2-3 sentences max. Never diagnose, treat, or give medical advice. Always reinforce that control is possible.`,
+        messages: [{
+          role: 'user',
+          content: mealMode === 'pre'
+            ? `My current glucose is ${glucose} mg/dL. I am thinking of eating: ${meal}. Recent history: ${context}. Weekly average: ${document.getElementById('avg-val').textContent} mg/dL. Should I eat this? What should I watch for? Give me pre-meal coaching.`
+            : mealMode === 'post'
+            ? `I just ate: ${meal}. My glucose reading is ${glucose} mg/dL. Recent history: ${context}. Weekly average: ${document.getElementById('avg-val').textContent} mg/dL. Assess this meal and give me post-meal coaching.`
+            : `My glucose reading right now is ${glucose} mg/dL. Recent history: ${context}. Weekly average: ${document.getElementById('avg-val').textContent} mg/dL. No meal — just checking in. Acknowledge this reading, celebrate any improvement, identify any trend, and give me one word of encouragement. Keep it warm and brief.`
+        }]
+      })
+    });
+    const data = await res.json();
+    entry.response = data.content?.[0]?.text || "Great log! Keep building that pattern.";
+  } catch(err) {
+    entry.response = "Log saved. Your coach will respond shortly — keep tracking!";
+  }
+
+  entry.loading = false;
+  save();
+  renderHistory();
+
+  btn.disabled = false;
+  btn.textContent = 'Log & Coach';
+}
+
+// ── RENDER HISTORY ────────────────────────────────────────
+function makeEntryHTML(entry) {
+  const cls = entry.glucose < 140 ? 'green' : entry.glucose < 180 ? 'amber' : 'red';
+  const modeLabel = entry.mode === 'pre' ? 'Pre-meal' : entry.mode === 'check' ? 'Morning S.H.I.F.T.' : 'Post-meal';
+  const modeColor = entry.mode === 'pre' ? 'color:var(--gold);background:var(--gold-dim);' : entry.mode === 'check' ? 'color:#1a9e4f;background:rgba(26,158,79,0.1);' : 'color:#888;background:rgba(0,0,0,0.05);';
+  const mealText  = entry.mode === 'check' ? 'Morning S.H.I.F.T.' : entry.meal;
+  const div = document.createElement('div');
+  div.className = 'entry';
+  div.innerHTML =
+    '<div class="entry-top">' +
+      '<div class="entry-meal">' +
+        '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;margin-right:6px;' + modeColor + '">' + modeLabel + '</span>' +
+        mealText +
+      '</div>' +
+      '<div class="entry-badges">' +
+        '<div class="glucose-badge ' + cls + '">' + entry.glucose + ' mg/dL</div>' +
+        '<div class="entry-time">' + entry.date + ' · ' + entry.time + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="entry-response' + (entry.loading ? ' loading' : '') + '">' +
+      (entry.loading ? '⏳ Getting your personalized coaching…' : (entry.response || 'Response pending…')) +
+    '</div>';
+  return div;
+}
+
+function renderHistory() {
+  const wrap  = document.getElementById('history');
+  const empty = document.getElementById('empty-state');
+  wrap.querySelectorAll('.entry, .load-more-btn').forEach(e => e.remove());
+
+  if (!logs.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  logs.slice(0, 30).forEach(entry => wrap.appendChild(makeEntryHTML(entry)));
+
+  const hidden = logs.length - 30;
+  if (hidden > 0) {
+    const more = document.createElement('div');
+    more.className = 'load-more-btn';
+    more.style.cssText = 'text-align:center;padding:16px;font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:1px dashed var(--border);margin-top:4px;';
+    more.textContent = '+ ' + hidden + ' older entries';
+    more.onclick = showAllHistory;
+    wrap.appendChild(more);
+  }
+}
+
+function showAllHistory() {
+  const wrap = document.getElementById('history');
+  wrap.querySelectorAll('.entry, .load-more-btn').forEach(e => e.remove());
+  logs.forEach(entry => wrap.appendChild(makeEntryHTML(entry)));
+
+  const collapse = document.createElement('div');
+  collapse.style.cssText = 'text-align:center;padding:16px;font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:1px dashed var(--border);margin-top:4px;';
+  collapse.textContent = 'Show less';
+  collapse.onclick = renderHistory;
+  wrap.appendChild(collapse);
+}
+
+// ── CHART ─────────────────────────────────────────────────
+function renderChart() {
+  const ctx    = document.getElementById('chart').getContext('2d');
+  const recent = readings.slice(-30);
+  const labels = recent.map((_, i) => i % 5 === 0 ? recent[i].d : '');
+  const data   = recent.map(r => r.v);
+
+  if (glChart) glChart.destroy();
+
+  glChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          data,
+          borderColor: '#A8881F',
+          backgroundColor: 'rgba(201,162,39,0.06)',
+          borderWidth: 2,
+          pointBackgroundColor: data.map(v => v < 140 ? '#27C96A' : v < 180 ? '#F5A623' : '#E84040'),
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          data: data.map(() => 140),
+          borderColor: 'rgba(39,201,106,0.25)',
+          borderDash: [4,4],
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111',
+          borderColor: '#A8881F',
+          borderWidth: 1,
+          titleColor: '#C9A227',
+          bodyColor: '#ccc',
+          callbacks: { label: c => ` ${c.parsed.y} mg/dL` }
+        }
+      },
+      scales: {
+        x: {
+          grid:  { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#555', font: { size: 9 } }
+        },
+        y: {
+          min: 60, max: 300,
+          grid:  { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#555', font: { size: 9 }, callback: v => v }
+        }
+      }
+    }
+  });
+}
+
+// ── PERSIST ───────────────────────────────────────────────
+function save() {
+  // Keep last 90 entries max to prevent localStorage bloat
+  if (logs.length > 90)     logs     = logs.slice(0, 90);
+  if (readings.length > 90) readings = readings.slice(0, 90);
+  localStorage.setItem('bss_logs',     JSON.stringify(logs));
+  localStorage.setItem('bss_readings', JSON.stringify(readings));
+}
+
+// Enter key on glucose field submits
+document.getElementById('glucose-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') logMeal();
+});
+
+}
+</script>
