@@ -1306,14 +1306,16 @@ if (!window.__bss_dashboard_loaded) {
 
 // ── CONFIG — GHL merge tags ───────────────────────────────
 const CONFIG = {
-  WEBHOOK_URL:     'YOUR_CLAUDE_WEBHOOK_URL',
+  WEBHOOK_URL:     'https://services.leadconnectorhq.com/hooks/wkhWB3HrJJWgOI7ovc8K/webhook-trigger/dda7348b-fba4-40ad-b3d4-43672ea01240',
   USER_NAME:       ('{{contact.first_name}}' && !('{{contact.first_name}}'.includes('{{'))) ? '{{contact.first_name}}' : 'Friend',
   PLAN_TYPE:       ('{{contact.plan_type}}' && !('{{contact.plan_type}}'.includes('{{'))) ? '{{contact.plan_type}}' : 'Monthly',
   FASTING:         parseFloat('{{contact.glucose_fasting}}') || null,
   POSTMEAL:        parseFloat('{{contact.glucose_postmeal}}') || null,
   CONTACT_ID:      '{{contact.id}}',
   CONTACT_EMAIL:   '{{contact.email}}',
-  ANTHROPIC_KEY:   'PASTE_YOUR_NEW_API_KEY_HERE',
+  ANTHROPIC_KEY:   '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
+
+',
 };
 
 // ── PLAN LOGIC ───────────────────────────────────────────
